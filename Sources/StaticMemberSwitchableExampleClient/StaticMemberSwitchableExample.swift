@@ -10,7 +10,16 @@ import StaticMemberSwitchable
 }
 
 func testStaticMemberSwitchable() {
-    for value in Example.allStaticMembers {
-        print(value.value)
+    let values: [Example] = [.foo, .bar, .baz]
+    for value in values {
+        // Exhaustively switch over static members
+        switch value.switchable {
+        case .foo:
+            print("Value is foo")
+        case .bar:
+            print("Value is bar")
+        case .baz:
+            print("Value is baz")
+        }
     }
 }

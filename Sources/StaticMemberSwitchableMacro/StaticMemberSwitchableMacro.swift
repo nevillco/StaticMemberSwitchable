@@ -5,16 +5,19 @@ public struct StaticMemberSwitchableMacro: MemberMacro {
         providingMembersOf declaration: Declaration,
         in context: Context
     ) throws -> [DeclSyntax] {
-        let properties = declaration.properties
+        let staticProperties = declaration.properties
             .filter { property in
                 property.accessLevel >= declaration.declAccessLevel && property.isStatic
             }
-
-        let allStaticMembers: DeclSyntax = 
+        let cases = staticProperties.map(\.identifier.text)
+            .map { "case \($0)" }
+            .joined(separator: "\n")
+        let allStaticMembers: DeclSyntax =
         """
-        \(raw: declaration.declAccessLevel) static var allStaticMembers = [
-            \(raw: properties.map(\.identifier.text).joined(separator: ",\n"))
-        ]
+        enum Switchable {
+            \(raw: cases)
+        }
+        var switchable: Switchable { .foo }
         """
 
         return [allStaticMembers]
