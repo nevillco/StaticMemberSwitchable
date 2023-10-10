@@ -1,7 +1,7 @@
 // MARK: - AccessLevelSyntax
 public protocol AccessLevelSyntax {
 
-    var modifiers: DeclModifierListSyntax { get set }
+    var modifiers: DeclModifierListSyntax { get }
 
 }
 
@@ -9,18 +9,9 @@ public protocol AccessLevelSyntax {
 extension AccessLevelSyntax {
 
     var accessLevel: AccessLevelModifier {
-        get {
-            modifiers.lazy
-                .compactMap { AccessLevelModifier(rawValue: $0.name.text) }
-                .first ?? .internal
-        }
-        set {
-            modifiers = modifiers.filter {
-                AccessLevelModifier(rawValue: $0.name.text) == nil
-            } + [
-                DeclModifierSyntax(name: .keyword(newValue.keyword))
-            ]
-        }
+        modifiers.lazy
+            .compactMap { AccessLevelModifier(rawValue: $0.name.text) }
+            .first ?? .internal
     }
 
 }
