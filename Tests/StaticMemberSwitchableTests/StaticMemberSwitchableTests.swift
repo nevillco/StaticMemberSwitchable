@@ -169,7 +169,7 @@ final class StaticMemberSwitchableTests: XCTestCase {
             """
             @StaticMemberSwitchable struct Example {
             ┬──────────────────────
-            ╰─ 🛑 StaticMemberSwitchable requires types conform to either Identifiable or Equatable.
+            ╰─ 🛑 Types must conform to either Equatable or Identifiable in the same declaraction that they use @StaticMemberSwitchable.
                 static let foo: Self = .init(id: "foo")
                 static let bar: Self = .init(id: "bar")
                 static let baz: Self = .init(id: "baz")

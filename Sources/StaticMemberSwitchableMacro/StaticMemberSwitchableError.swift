@@ -55,7 +55,7 @@ extension StaticMemberSwitchableError {
     )
 
     static let missingRequiredConformance = Self(
-        message: "StaticMemberSwitchable requires types conform to either Identifiable or Equatable.", 
+        message: "Types must conform to either Equatable or Identifiable in the same declaraction that they use @StaticMemberSwitchable.", 
         kind: .missingRequiredConformance
     )
 

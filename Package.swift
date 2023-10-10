@@ -13,8 +13,8 @@ let package = Package(
             targets: ["StaticMemberSwitchable"]
         ),
         .executable(
-            name: "StaticMemberSwitchableExampleClient",
-            targets: ["StaticMemberSwitchableExampleClient"]
+            name: "StaticMemberSwitchableExample",
+            targets: ["StaticMemberSwitchableExample"]
         ),
     ],
     dependencies: [
@@ -37,14 +37,14 @@ let package = Package(
             ]
         ),
         // Library that exposes a macro as part of its API, 
-        // which is used in client programs.
+        // which can be used by external clients.
         .target(
             name: "StaticMemberSwitchable",
             dependencies: ["StaticMemberSwitchableMacro"]
         ),
         // An example client to demonstrate usage.
         .executableTarget(
-            name: "StaticMemberSwitchableExampleClient",
+            name: "StaticMemberSwitchableExample",
             dependencies: ["StaticMemberSwitchable"]
         ),
         // A test target used to develop the macro implementation.
