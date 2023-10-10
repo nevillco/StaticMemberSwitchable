@@ -22,6 +22,10 @@ let package = Package(
             url: "https://github.com/apple/swift-syntax.git",
             from: "509.0.0-swift-5.9-DEVELOPMENT-SNAPSHOT-2023-04-25-b"
         ),
+        .package(
+            url: "https://github.com/pointfreeco/swift-macro-testing",
+            from: "0.2.1"
+        )
     ],
     targets: [
         // Actual macro implementation that performs the compile-time codegen.
@@ -52,6 +56,10 @@ let package = Package(
                     name: "SwiftSyntaxMacrosTestSupport",
                     package: "swift-syntax"
                 ),
+                .product(
+                    name: "MacroTesting",
+                    package: "swift-macro-testing"
+                )
             ]
         ),
     ]
