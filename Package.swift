@@ -12,6 +12,10 @@ let package = Package(
             name: "StaticMemberSwitchable",
             targets: ["StaticMemberSwitchable"]
         ),
+        .executable(
+            name: "StaticMemberSwitchableExampleClient",
+            targets: ["StaticMemberSwitchableExampleClient"]
+        ),
     ],
     dependencies: [
         .package(
@@ -25,10 +29,11 @@ let package = Package(
             name: "StaticMemberSwitchableMacro",
             dependencies: [
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
-                .product(name: "SwiftCompilerPlugin", package: "swift-syntax")
+                .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
             ]
         ),
-        // Library that exposes a macro as part of its API, which is used in client programs.
+        // Library that exposes a macro as part of its API, 
+        // which is used in client programs.
         .target(
             name: "StaticMemberSwitchable",
             dependencies: ["StaticMemberSwitchableMacro"]
