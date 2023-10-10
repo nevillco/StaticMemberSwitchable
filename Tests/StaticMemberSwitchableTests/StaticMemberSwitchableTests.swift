@@ -18,9 +18,15 @@ final class StaticMemberSwitchableTests: XCTestCase {
         assertMacro(record: false) {
             """
             @StaticMemberSwitchable struct Example: Identifiable {
-                static let foo: Self = .init(id: "foo")
-                static let bar: Self = .init(id: "bar")
-                static let baz: Self = .init(id: "baz")
+                static let a: Self = .init(id: "foo")
+                static let b = Self.init(id: "bar")
+                static let c = Self(id: "baz")
+                static let d: Example = .init(id: "qux")
+                static let e = Example(id: "qux")
+                static let f = Example.init(id: "thud")
+
+                static let notTheRightType1: Int = 6
+                static let notTheRightType2 = "test"
 
                 let id: String
             }
@@ -28,22 +34,34 @@ final class StaticMemberSwitchableTests: XCTestCase {
         } expansion: {
             """
             struct Example: Identifiable {
-                static let foo: Self = .init(id: "foo")
-                static let bar: Self = .init(id: "bar")
-                static let baz: Self = .init(id: "baz")
+                static let a: Self = .init(id: "foo")
+                static let b = Self.init(id: "bar")
+                static let c = Self(id: "baz")
+                static let d: Example = .init(id: "qux")
+                static let e = Example(id: "qux")
+                static let f = Example.init(id: "thud")
+
+                static let notTheRightType1: Int = 6
+                static let notTheRightType2 = "test"
 
                 let id: String
 
                 enum StaticMemberSwitchable {
-                    case foo
-                    case bar
-                    case baz
+                    case a
+                    case b
+                    case c
+                    case d
+                    case e
+                    case f
                 }
                 var switchable: StaticMemberSwitchable {
                     switch id {
-                        case Self.foo.id: return .foo
-                        case Self.bar.id: return .bar
-                        case Self.baz.id: return .baz
+                        case Self.a.id: return .a
+                        case Self.b.id: return .b
+                        case Self.c.id: return .c
+                        case Self.d.id: return .d
+                        case Self.e.id: return .e
+                        case Self.f.id: return .f
                         default: fatalError()
                     }
                 }
@@ -56,9 +74,15 @@ final class StaticMemberSwitchableTests: XCTestCase {
         assertMacro(record: false) {
             """
             @StaticMemberSwitchable struct Example: Equatable {
-                static let foo: Self = .init(id: "foo")
-                static let bar: Self = .init(id: "bar")
-                static let baz: Self = .init(id: "baz")
+                static let a: Self = .init(id: "foo")
+                static let b = Self.init(id: "bar")
+                static let c = Self(id: "baz")
+                static let d: Example = .init(id: "qux")
+                static let e = Example(id: "qux")
+                static let f = Example.init(id: "thud")
+
+                static let notTheRightType1: Int = 6
+                static let notTheRightType2 = "test"
 
                 let id: String
             }
@@ -66,22 +90,34 @@ final class StaticMemberSwitchableTests: XCTestCase {
         } expansion: {
             """
             struct Example: Equatable {
-                static let foo: Self = .init(id: "foo")
-                static let bar: Self = .init(id: "bar")
-                static let baz: Self = .init(id: "baz")
+                static let a: Self = .init(id: "foo")
+                static let b = Self.init(id: "bar")
+                static let c = Self(id: "baz")
+                static let d: Example = .init(id: "qux")
+                static let e = Example(id: "qux")
+                static let f = Example.init(id: "thud")
+
+                static let notTheRightType1: Int = 6
+                static let notTheRightType2 = "test"
 
                 let id: String
 
                 enum StaticMemberSwitchable {
-                    case foo
-                    case bar
-                    case baz
+                    case a
+                    case b
+                    case c
+                    case d
+                    case e
+                    case f
                 }
                 var switchable: StaticMemberSwitchable {
                     switch self {
-                        case .foo: return .foo
-                        case .bar: return .bar
-                        case .baz: return .baz
+                        case .a: return .a
+                        case .b: return .b
+                        case .c: return .c
+                        case .d: return .d
+                        case .e: return .e
+                        case .f: return .f
                         default: fatalError()
                     }
                 }

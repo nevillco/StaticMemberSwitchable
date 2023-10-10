@@ -3,7 +3,7 @@ import StaticMemberSwitchable
 
 @StaticMemberSwitchable struct Example: Identifiable {
     static let foo: Self = .init(id: "foo")
-    static let bar: Self = .init(id: "bar")
+    static let bar = Self.init(id: "bar")
     static let baz: Self = .init(id: "baz")
 
     let id: String
