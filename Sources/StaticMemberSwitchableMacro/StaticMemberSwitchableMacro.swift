@@ -5,32 +5,50 @@ public struct StaticMemberSwitchableMacro: MemberMacro {
         providingMembersOf declaration: Declaration,
         in context: Context
     ) throws -> [DeclSyntax] {
-        guard let structDeclaration = declaration.as(StructDeclSyntax.self) else {
-            throw StaticMemberSwitchableError.notAStruct.diagnostic(node: node)
-        }
         let staticProperties = declaration.properties.filter { property in
             property.accessLevel >= declaration.declAccessLevel && property.isStatic
         }
         let staticPropertyIdentifiers = staticProperties.map(\.identifier.text)
 
+        guard let structDeclaration = declaration.as(StructDeclSyntax.self) else {
+            throw StaticMemberSwitchableError.notAStruct.diagnostic(node: node)
+        }
+        let inheritance = structDeclaration.inheritanceClause?.inheritedTypes ?? []
+        let declarationInheritsProtocol: (String) -> Bool = { protocolName in
+            inheritance.contains { $0.trimmed.description == protocolName }
+        }
+
+        let switchValue: String
+        let switchCaseForStaticProperty: (String) -> String
+        if declarationInheritsProtocol("Identifiable") {
+            switchValue = "id"
+            switchCaseForStaticProperty = { staticProperty in
+                "case Self.\(staticProperty).id: return .\(staticProperty)"
+            }
+        } else if declarationInheritsProtocol("Equatable") {
+            switchValue = "self"
+            switchCaseForStaticProperty = { staticProperty in
+                "case .\(staticProperty): return .\(staticProperty)"
+            }
+        } else {
+            throw StaticMemberSwitchableError.missingRequiredConformance
+                .diagnostic(node: node)
+        }
+
         let cases = staticPropertyIdentifiers
             .map { "case \($0)" }
             .joined(separator: "\n")
-
-//        let switchableProperty: DeclSyntax
-//        guard let inheritance = structDecl.inheritanceClause?.inheritedTypeCollection else { throw ... }
-//        guard inheritance.contains(where: { $0.trimmed.description == "Identifiable" }) else { throw ... }
         return [
             """
             enum StaticMemberSwitchable {
                 \(raw: cases)
             }
             var switchable: StaticMemberSwitchable {
-                switch id {
-            \(raw: staticPropertyIdentifiers
-            .map { "        case Self.\($0).id: return .\($0)" }
-            .joined(separator: "\n")
-            )
+                switch \(raw: switchValue) {
+                    \(raw: staticPropertyIdentifiers
+                    .map(switchCaseForStaticProperty)
+                    .joined(separator: "\n        ")
+                    )
                     default: fatalError()
                 }
             }

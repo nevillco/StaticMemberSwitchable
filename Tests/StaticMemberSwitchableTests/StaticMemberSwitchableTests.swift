@@ -14,10 +14,10 @@ final class StaticMemberSwitchableTests: XCTestCase {
 
     // MARK: Success cases
 
-    func testSuccess() {
+    func testSuccess_Identifiable() {
         assertMacro(record: false) {
             """
-            @StaticMemberSwitchable struct Example {
+            @StaticMemberSwitchable struct Example: Identifiable {
                 static let foo: Self = .init(id: "foo")
                 static let bar: Self = .init(id: "bar")
                 static let baz: Self = .init(id: "baz")
@@ -27,7 +27,7 @@ final class StaticMemberSwitchableTests: XCTestCase {
             """
         } expansion: {
             """
-            struct Example {
+            struct Example: Identifiable {
                 static let foo: Self = .init(id: "foo")
                 static let bar: Self = .init(id: "bar")
                 static let baz: Self = .init(id: "baz")
@@ -52,10 +52,48 @@ final class StaticMemberSwitchableTests: XCTestCase {
         }
     }
 
+    func testSuccess_Equatable() {
+        assertMacro(record: false) {
+            """
+            @StaticMemberSwitchable struct Example: Equatable {
+                static let foo: Self = .init(id: "foo")
+                static let bar: Self = .init(id: "bar")
+                static let baz: Self = .init(id: "baz")
+
+                let id: String
+            }
+            """
+        } expansion: {
+            """
+            struct Example: Equatable {
+                static let foo: Self = .init(id: "foo")
+                static let bar: Self = .init(id: "bar")
+                static let baz: Self = .init(id: "baz")
+
+                let id: String
+
+                enum StaticMemberSwitchable {
+                    case foo
+                    case bar
+                    case baz
+                }
+                var switchable: StaticMemberSwitchable {
+                    switch self {
+                        case .foo: return .foo
+                        case .bar: return .bar
+                        case .baz: return .baz
+                        default: fatalError()
+                    }
+                }
+            }
+            """
+        }
+    }
+
     // MARK: Failure Cases
 
     func testFailure_NotAStruct() {
-        assertMacro(record: false) {
+        assertMacro {
             """
             @StaticMemberSwitchable enum Example {
                 static let foo: Self = .init(id: "foo")
@@ -70,6 +108,32 @@ final class StaticMemberSwitchableTests: XCTestCase {
             @StaticMemberSwitchable enum Example {
             ┬──────────────────────
             ╰─ 🛑 StaticMemberSwitchable only supports struct values.
+                static let foo: Self = .init(id: "foo")
+                static let bar: Self = .init(id: "bar")
+                static let baz: Self = .init(id: "baz")
+
+                let id: String
+            }
+            """
+        }
+    }
+
+    func testFailure_MissingRequiredConformance() {
+        assertMacro {
+            """
+            @StaticMemberSwitchable struct Example {
+                static let foo: Self = .init(id: "foo")
+                static let bar: Self = .init(id: "bar")
+                static let baz: Self = .init(id: "baz")
+
+                let id: String
+            }
+            """
+        } diagnostics: {
+            """
+            @StaticMemberSwitchable struct Example {
+            ┬──────────────────────
+            ╰─ 🛑 StaticMemberSwitchable requires types conform to either Identifiable or Equatable.
                 static let foo: Self = .init(id: "foo")
                 static let bar: Self = .init(id: "bar")
                 static let baz: Self = .init(id: "baz")

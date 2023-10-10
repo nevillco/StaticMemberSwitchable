@@ -5,6 +5,7 @@ public struct StaticMemberSwitchableError: Error {
 
     public enum Kind: String {
         case notAStruct
+        case missingRequiredConformance
     }
     public let kind: Kind
 
@@ -51,6 +52,11 @@ extension StaticMemberSwitchableError {
     static let notAStruct = Self(
         message: "StaticMemberSwitchable only supports struct values.",
         kind: .notAStruct
+    )
+
+    static let missingRequiredConformance = Self(
+        message: "StaticMemberSwitchable requires types conform to either Identifiable or Equatable.", 
+        kind: .missingRequiredConformance
     )
 
 }
