@@ -14,15 +14,22 @@ public struct StaticMemberSwitchableMacro: MemberMacro {
             .map { "case \($0)" }
             .joined(separator: "\n")
 
-        let allStaticMembers: DeclSyntax =
-        """
-        enum Switchable {
-            \(raw: cases)
-        }
-        var switchable: Switchable { .foo }
-        """
-
-        return [allStaticMembers]
+        return [
+            """
+            enum Switchable {
+                \(raw: cases)
+            }
+            var switchable: Switchable {
+                switch id {
+            \(raw: staticPropertyIdentifiers
+            .map { "        case Self.\($0).id: return .\($0)" }
+            .joined(separator: "\n")
+            )
+                    default: fatalError()
+                }
+            }
+            """
+        ]
     }
 
 }
