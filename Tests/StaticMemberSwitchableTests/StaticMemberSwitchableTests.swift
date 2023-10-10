@@ -12,6 +12,8 @@ final class StaticMemberSwitchableTests: XCTestCase {
         }
     }
 
+    // MARK: Success cases
+
     func testSuccess() {
         assertMacro(record: false) {
             """
@@ -45,6 +47,34 @@ final class StaticMemberSwitchableTests: XCTestCase {
                         default: fatalError()
                     }
                 }
+            }
+            """
+        }
+    }
+
+    // MARK: Failure Cases
+
+    func testFailure_NotAStruct() {
+        assertMacro(record: false) {
+            """
+            @StaticMemberSwitchable enum Example {
+                static let foo: Self = .init(id: "foo")
+                static let bar: Self = .init(id: "bar")
+                static let baz: Self = .init(id: "baz")
+
+                let id: String
+            }
+            """
+        } diagnostics: {
+            """
+            @StaticMemberSwitchable enum Example {
+            ┬──────────────────────
+            ╰─ 🛑 StaticMemberSwitchable only supports struct values.
+                static let foo: Self = .init(id: "foo")
+                static let bar: Self = .init(id: "bar")
+                static let baz: Self = .init(id: "baz")
+
+                let id: String
             }
             """
         }

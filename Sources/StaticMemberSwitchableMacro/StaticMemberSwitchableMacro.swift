@@ -5,6 +5,9 @@ public struct StaticMemberSwitchableMacro: MemberMacro {
         providingMembersOf declaration: Declaration,
         in context: Context
     ) throws -> [DeclSyntax] {
+        guard let structDeclaration = declaration.as(StructDeclSyntax.self) else {
+            throw StaticMemberSwitchableError.notAStruct.diagnostic(node: node)
+        }
         let staticProperties = declaration.properties.filter { property in
             property.accessLevel >= declaration.declAccessLevel && property.isStatic
         }
@@ -14,6 +17,9 @@ public struct StaticMemberSwitchableMacro: MemberMacro {
             .map { "case \($0)" }
             .joined(separator: "\n")
 
+//        let switchableProperty: DeclSyntax
+//        guard let inheritance = structDecl.inheritanceClause?.inheritedTypeCollection else { throw ... }
+//        guard inheritance.contains(where: { $0.trimmed.description == "Identifiable" }) else { throw ... }
         return [
             """
             enum StaticMemberSwitchable {
