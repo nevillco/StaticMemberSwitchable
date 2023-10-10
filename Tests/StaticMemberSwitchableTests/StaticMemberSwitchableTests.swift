@@ -13,7 +13,7 @@ final class StaticMemberSwitchableTests: XCTestCase {
     }
 
     func testSuccess() {
-        assertMacro {
+        assertMacro(record: false) {
             """
             @StaticMemberSwitchable struct Example {
                 static let foo: Self = .init(id: "foo")
@@ -32,12 +32,12 @@ final class StaticMemberSwitchableTests: XCTestCase {
 
                 let id: String
 
-                enum Switchable {
+                enum StaticMemberSwitchable {
                     case foo
                     case bar
                     case baz
                 }
-                var switchable: Switchable {
+                var switchable: StaticMemberSwitchable {
                     switch id {
                         case Self.foo.id: return .foo
                         case Self.bar.id: return .bar

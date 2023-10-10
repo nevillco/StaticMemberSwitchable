@@ -16,10 +16,10 @@ public struct StaticMemberSwitchableMacro: MemberMacro {
 
         return [
             """
-            enum Switchable {
+            enum StaticMemberSwitchable {
                 \(raw: cases)
             }
-            var switchable: Switchable {
+            var switchable: StaticMemberSwitchable {
                 switch id {
             \(raw: staticPropertyIdentifiers
             .map { "        case Self.\($0).id: return .\($0)" }
