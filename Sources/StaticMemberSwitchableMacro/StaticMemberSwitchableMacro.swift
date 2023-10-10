@@ -1,7 +1,10 @@
 // MARK: - StaticMemberSwitchableMacro
 public struct StaticMemberSwitchableMacro: MemberMacro {
 
-    public static func expansion<Declaration: DeclGroupSyntax, Context: MacroExpansionContext>(
+    public static func expansion<
+        Declaration: DeclGroupSyntax,
+        Context: MacroExpansionContext
+    >(
         of node: AttributeSyntax,
         providingMembersOf declaration: Declaration,
         in context: Context
@@ -20,19 +23,20 @@ public struct StaticMemberSwitchableMacro: MemberMacro {
             node: node
         )
 
-        let cases = staticPropertyIdentifiers
-            .map { "case \($0)" }
-            .joined(separator: "\n")
         return [
             """
             enum StaticMemberSwitchable {
-                \(raw: cases)
+                \(raw: staticPropertyIdentifiers
+                    .map { "case \($0)" }
+                    .joined(separator: "\n")
+                )
             }
             var switchable: StaticMemberSwitchable {
                 switch \(raw: conformanceSpecificInfo.switchValue) {
                     \(raw: staticPropertyIdentifiers
-                    .map(conformanceSpecificInfo.makeCaseFromPropertyName)
-                    .joined(separator: "\n        ")
+                        .map(conformanceSpecificInfo.makeCaseFromPropertyName)
+                        // Hack to make indentation correct on all case values
+                        .joined(separator: "\n        ")
                     )
                     default: fatalError()
                 }
@@ -46,55 +50,62 @@ public struct StaticMemberSwitchableMacro: MemberMacro {
 // MARK: - StaticMemberSwitchableMacro - Private
 private extension StaticMemberSwitchableMacro {
 
+    // MARK: Valid Static Properties
+
     static func validStaticProperties(
         declaration: StructDeclSyntax
     ) -> [VariableDeclSyntax] {
-        // Only include static members with the same type as the declaration’s type.
+        // Only include static members with the same type as the declaration.
         let validStaticPropertyTypeNames: Set<String> = [
+            // Explicit type of the @StaticMemberSwitchable struct
             declaration.name.trimmedDescription,
             "Self"
         ]
+        // There are several different ways to structure a valid static member.
+        // Collect all of them and check for set intersection with above values.
         return declaration.properties.filter { property in
-            let possibleSelfReferencesArray = [
-                // static let ___: Self = ...
-                property.bindings
-                    .compactMap(\.typeAnnotation?.type.trimmedDescription),
-                // static let ___ = Self.init(...
-                property.bindings
-                    .compactMap(\.initializer?.value)
-                    .compactMap { value in
-                        value.as(FunctionCallExprSyntax.self)?
-                            .calledExpression
-                            .as(MemberAccessExprSyntax.self)?
-                            .base?.trimmedDescription
-                    },
-                // static let ___ = Self(...
-                property.bindings
-                    .compactMap(\.initializer?.value)
-                    .compactMap { value in
-                        value .as(FunctionCallExprSyntax.self)?
-                            .calledExpression
-                            .as(DeclReferenceExprSyntax.self)?
-                            .trimmedDescription
-                    }
-            ]
             let possibleSelfReferences = Set(
-                possibleSelfReferencesArray.flatMap { $0 }
+                [
+                    // static let ___: Self = ...
+                    property.bindings
+                        .compactMap(\.typeAnnotation?.type.trimmedDescription),
+                    // static let ___ = Self.init(...
+                    property.bindings
+                        .compactMap(\.initializer?.value)
+                        .compactMap { value in
+                            value.as(FunctionCallExprSyntax.self)?
+                                .calledExpression
+                                .as(MemberAccessExprSyntax.self)?
+                                .base?.trimmedDescription
+                        },
+                    // static let ___ = Self(...
+                    property.bindings
+                        .compactMap(\.initializer?.value)
+                        .compactMap { value in
+                            value .as(FunctionCallExprSyntax.self)?
+                                .calledExpression
+                                .as(DeclReferenceExprSyntax.self)?
+                                .trimmedDescription
+                        }
+                ].flatMap { $0 }
             )
-            let hasSameType = validStaticPropertyTypeNames
+            let hasSameTypeAsDeclaration = validStaticPropertyTypeNames
                 .intersection(possibleSelfReferences)
                 .isEmpty == false
-            return hasSameType
+            return hasSameTypeAsDeclaration
             && property.accessLevel >= declaration.declAccessLevel
             && property.isStatic
         }
     }
 
+    // MARK: Identifiable/Equatable Dependency
+
     static func declaration(
         _ declaration: StructDeclSyntax,
         inheritsProtocolNamed protocolName: String
     ) -> Bool {
-        let inheritedProtocols = declaration.inheritanceClause?.inheritedTypes
+        let inheritedProtocols = declaration
+            .inheritanceClause?.inheritedTypes
             .map(\.trimmedDescription) ?? []
         return inheritedProtocols.contains(protocolName)
     }
