@@ -18,31 +18,62 @@ public struct StaticMemberSwitchableMacro: MemberMacro {
             declaration: structDeclaration
         ).map(\.identifier.text)
 
-        let conformanceSpecificInfo = try conformanceSpecificInfo(
-            declaration: structDeclaration,
-            node: node
-        )
-
-        return [
-            """
-            enum StaticMemberSwitchable {
-                \(raw: staticPropertyIdentifiers
-                    .map { "case \($0)" }
-                    .joined(separator: "\n")
-                )
-            }
-            var switchable: StaticMemberSwitchable {
-                switch \(raw: conformanceSpecificInfo.switchValue) {
+        if self.declaration(
+            structDeclaration,
+            inheritsProtocolNamed: "Identifiable"
+        ) {
+            return [
+                """
+                enum StaticMemberSwitchable {
                     \(raw: staticPropertyIdentifiers
-                        .map(conformanceSpecificInfo.makeCaseFromPropertyName)
-                        // Hack to make indentation correct on all case values
-                        .joined(separator: "\n        ")
+                        .map { "case \($0)" }
+                        .joined(separator: "\n")
                     )
-                    default: fatalError()
                 }
-            }
-            """
-        ]
+                var switchable: StaticMemberSwitchable {
+                    switch id {
+                        \(raw: staticPropertyIdentifiers
+                            .map { propertyName in
+                                "case Self.\(propertyName).id: return .\(propertyName)"
+                            }
+                            // Hack to make indentation correct on all case values
+                            .joined(separator: "\n        ")
+                        )
+                        default: fatalError()
+                    }
+                }
+                """
+            ]
+        } else if self.declaration(
+            structDeclaration,
+            inheritsProtocolNamed: "Equatable"
+        ) {
+            return [
+                """
+                enum StaticMemberSwitchable {
+                    \(raw: staticPropertyIdentifiers
+                        .map { "case \($0)" }
+                        .joined(separator: "\n")
+                    )
+                }
+                var switchable: StaticMemberSwitchable {
+                    switch self {
+                        \(raw: staticPropertyIdentifiers
+                            .map { propertyName in
+                                "case .\(propertyName): return .\(propertyName)"
+                            }
+                            // Hack to make indentation correct on all case values
+                            .joined(separator: "\n        ")
+                        )
+                        default: fatalError()
+                    }
+                }
+                """
+            ]
+        } else {
+            throw StaticMemberSwitchableError.missingRequiredConformance
+                .diagnostic(node: node)
+        }
     }
 
 }
@@ -98,7 +129,7 @@ private extension StaticMemberSwitchableMacro {
         }
     }
 
-    // MARK: Identifiable/Equatable Dependency
+    // MARK: Protocol Inheritance
 
     static func declaration(
         _ declaration: StructDeclSyntax,
@@ -108,40 +139,6 @@ private extension StaticMemberSwitchableMacro {
             .inheritanceClause?.inheritedTypes
             .map(\.trimmedDescription) ?? []
         return inheritedProtocols.contains(protocolName)
-    }
-
-    struct ConformanceSpecificInfo {
-        let switchValue: String
-        let makeCaseFromPropertyName: (String) -> String
-    }
-    static func conformanceSpecificInfo(
-        declaration: StructDeclSyntax,
-        node: AttributeSyntax
-    ) throws -> ConformanceSpecificInfo {
-        if self.declaration(
-            declaration,
-            inheritsProtocolNamed: "Identifiable"
-        ) {
-            return .init(
-                switchValue: "id",
-                makeCaseFromPropertyName: { propertyName in
-                    "case Self.\(propertyName).id: return .\(propertyName)"
-                }
-            )
-        } else if self.declaration(
-            declaration,
-            inheritsProtocolNamed: "Equatable"
-        ) {
-            return .init(
-                switchValue: "self",
-                makeCaseFromPropertyName: { propertyName in
-                    "case .\(propertyName): return .\(propertyName)"
-                }
-            )
-        } else {
-            throw StaticMemberSwitchableError.missingRequiredConformance
-                .diagnostic(node: node)
-        }
     }
 
 }
