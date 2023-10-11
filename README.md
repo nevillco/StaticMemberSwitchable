@@ -1,6 +1,6 @@
 # `StaticMemberSwitchable`
 
-`StaticMemberSwitchable` is a Swift Macro that provides a way to exhaustively switch over a type with static members.
+`StaticMemberSwitchable` is a Swift Macro that provides a way to _exhaustively switch over a type with static members_.
 
 ## Motivation
 
