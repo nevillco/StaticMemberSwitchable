@@ -55,6 +55,9 @@ final class StaticMemberSwitchableTests: XCTestCase {
                     case f
                 }
                 var switchable: StaticMemberSwitchable {
+                    Self.switchable(id: self.id)
+                }
+                static func switchable(id: ID) -> StaticMemberSwitchable {
                     switch id {
                         case Self.a.id: return .a
                         case Self.b.id: return .b
