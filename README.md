@@ -25,11 +25,45 @@ struct BasketballTeam: Equatable {
 ```
 in other words, a data type with lots of `static` members. 
 
-These values can also be represented as an `enum`, but there are [various tradeoffs](https://www.connorneville.com/blog/my-favorite-macro-use-case-staticmemberiterable) to that. Defining property values (like `name` and `primaryColor` above) requires a bunch of `switch`es all over the place, and adding a new `BasketballTeam` instance requires adding a case to each `switch` throughout the codebase.
+These values can also be represented as an `enum`, but there are [various tradeoffs](https://www.connorneville.com/blog/my-favorite-macro-use-case-staticmemberiterable) to that. Defining property values (like `name` and `primaryColor` above) requires a bunch of `switch`es all over the place, and adding a new `BasketballTeam` instance requires adding a case to each `switch` throughout the codebase:
+
+```swift
+// If we wrote this type as an enum instead:
+enum BasketballTeam: Equatable {
+    case celtics
+    case nuggets
+    
+    // Switches everywhere!
+    var name: String {
+        switch self {
+        case .celtics: // …
+        case .nuggets: // …
+        }
+    }
+    
+    var primaryColor: Color {
+        switch self {
+        // The various properties for .celtics etc
+        // are distributed all over the place.
+        case .celtics: // …
+        case .nuggets: // …
+        }
+    }
+    
+    // If we provide custom init behavior,
+    // no way to prevent callers from just using
+    // a `case` instead:
+    
+    // init(city: // …
+}
+```
 
 While a struct may be preferable to an enum when it comes to the above tradeoffs, structs with static members lose in one key area: **exhaustive switching.** Consider the below example that takes our struct instance as a parameter to build a localized string:
 
 ```swift
+// We’d actually be better off with an enum here, because
+// we wouldn’t need a `default`!
+
 func marketingTagline(team: BasketballTeam) -> String {
     switch team {
     case .celtics:
