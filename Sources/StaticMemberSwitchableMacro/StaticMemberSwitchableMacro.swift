@@ -31,6 +31,9 @@ public struct StaticMemberSwitchableMacro: MemberMacro {
                     )
                 }
                 var switchable: StaticMemberSwitchable {
+                    Self.switchable(id: self.id)
+                }
+                static func switchable(id: ID) -> StaticMemberSwitchable {
                     switch id {
                         \(raw: staticPropertyIdentifiers
                             .map { propertyName in
