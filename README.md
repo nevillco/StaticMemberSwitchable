@@ -81,7 +81,7 @@ This will work - except until someone adds a new static instance to `BasketballT
 `StaticMemberSwitchable` extends the above example code like so:
 
 ```swift
-@StaticMemberIterable struct BasketballTeam: Equatable {
+@StaticMemberSwitchable struct BasketballTeam: Equatable {
     let name: String
     let primaryColor: Color
     
@@ -131,5 +131,5 @@ func marketingTagline(team: BasketballTeam) -> String {
 Requirements for usage are:
 
 * `StaticMemberSwitchable` can currently only be attached to `struct` types. The macro implementation in theory could be extended to support `class` and `enum` types with static members - PRs are welcome.
-* `StaticMemberIterable` requires a way of uniquely identifying each static member and associating it with a `switch` case. For this purpose, the annotated struct must either be `Identifiable` or `Equatable`. The macro will fail to compile if that is not the case.
+* `StaticMemberSwitchable` requires a way of uniquely identifying each static member and associating it with a `switch` case. For this purpose, the annotated struct must either be `Identifiable` or `Equatable`. The macro will fail to compile if that is not the case.
 * Swift macros currently only have visibility into the declaration they are attached to, so the `: Identifiable` or `: Equatable` conformance must be declared in the same spot that the `@StaticMemberSwitchable` macro is attached.
