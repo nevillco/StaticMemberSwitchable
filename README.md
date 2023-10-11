@@ -138,4 +138,12 @@ func marketingTagline(team: BasketballTeam) -> String {
 
 `StaticMemberSwitchable` requires some way of _matching_ a `static` instance of your type with its macro-generated `case` value. The library supports 2 different implementations depending on if the adopting type is `Equatable` or `Identifiable`.
 
- If the type adopting `StaticMemberSwitchable` is `Identifiable`, the matching will be done by via the static member’s `id`. If the type adopting `StaticMemberSwitchable` is `Equatable`, the matching will be done via the static member’s `==` `Equatable` implementation. The `Identifiable` macro implementation takes precedence.
+ If the type adopting `StaticMemberSwitchable` is `Identifiable`, the matching will be done by via the static member’s `id`. If the type adopting `StaticMemberSwitchable` is `Equatable`, the matching will be done via the static member’s `==` `Equatable` implementation.
+
+ The `Identifiable` macro implementation takes precedence over the `Equatable` implementation, because with the former, a caller only needs the `id` of the value to exhaustively switch over static members (rather than an entire instance). For `Identifiable` types, the `StaticMemberSwitchable` macro provides this additional function:
+
+ ```swift
+ static func switchable(id: ID) -> StaticMemberSwitchable
+ ```
+
+See the [example target](./Sources/StaticMemberSwitchableExample) for example usage.
