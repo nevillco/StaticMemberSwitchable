@@ -124,11 +124,11 @@ func marketingTagline(team: BasketballTeam) -> String {
 }
 ```
 
-## Usage and Requirements
+## Usage
 
 `StaticMemberSwitchable` is integrated as a Swift package.
 
-Requirements for usage are:
+### Requirements
 
 * `StaticMemberSwitchable` can currently only be attached to `struct` types. The macro implementation in theory could be extended to support `class` and `enum` types with static members - PRs are welcome.
 * `StaticMemberSwitchable` requires a way of uniquely identifying each static member and associating it with a `switch` case. For this purpose, the annotated struct must either be `Identifiable` or `Equatable`. The macro will fail to compile if that is not the case.
