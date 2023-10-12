@@ -134,7 +134,7 @@ func marketingTagline(team: BasketballTeam) -> String {
 * `StaticMemberSwitchable` requires a way of uniquely identifying each static member and associating it with a `switch` case. For this purpose, the annotated struct must either be `Identifiable` or `Equatable`. The macro will fail to compile if that is not the case.
 * Swift macros currently only have visibility into the declaration they are attached to, so the `: Identifiable` or `: Equatable` conformance must be declared in the same spot that the `@StaticMemberSwitchable` macro is attached.
 
-# `Equatable` and `Identifiable` Values
+## `Equatable` and `Identifiable` Values
 
 `StaticMemberSwitchable` requires some way of _matching_ a `static` instance of your type with its macro-generated `case` value. The library supports 2 different implementations depending on if the adopting type is `Equatable` or `Identifiable`.
 
