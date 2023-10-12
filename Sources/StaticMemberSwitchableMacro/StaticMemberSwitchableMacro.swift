@@ -14,17 +14,24 @@ public struct StaticMemberSwitchableMacro: MemberMacro {
                 .notAStruct.diagnostic(node: node)
         }
 
-        let staticPropertyIdentifiers = validStaticProperties(
+        let staticProperties = staticPropertiesWithMatchingType(
             declaration: structDeclaration
-        ).map(\.identifier.text)
-
-        guard staticPropertyIdentifiers.isEmpty == false else {
+        )
+        guard staticProperties.isEmpty == false else {
             throw StaticMemberSwitchableError
-                .noStaticMembersFound(
-                    accessLevel: structDeclaration.accessLevel.rawValue
-                )
+                .noStaticMembersFound.diagnostic(node: node)
+        }
+
+        let staticPropertiesWithAccessLevel = staticProperties
+            .filter { $0.accessLevel >= structDeclaration.accessLevel }
+        guard staticPropertiesWithAccessLevel.isEmpty == false else {
+            throw StaticMemberSwitchableError
+                .noStaticMembersFound(withAccessLevel: structDeclaration.accessLevel)
                 .diagnostic(node: node)
         }
+
+        let staticPropertyIdentifiers = staticPropertiesWithAccessLevel
+            .map(\.identifier.text)
 
         if self.declaration(
             structDeclaration,
@@ -94,7 +101,7 @@ private extension StaticMemberSwitchableMacro {
 
     // MARK: Valid Static Properties
 
-    static func validStaticProperties(
+    static func staticPropertiesWithMatchingType(
         declaration: StructDeclSyntax
     ) -> [VariableDeclSyntax] {
         // Only include static members with the same type as the declaration.
@@ -135,7 +142,7 @@ private extension StaticMemberSwitchableMacro {
                 .intersection(possibleSelfReferences)
                 .isEmpty == false
             return hasSameTypeAsDeclaration
-            && property.accessLevel >= declaration.declAccessLevel
+//            && property.accessLevel >= declaration.declAccessLevel
             && property.isStatic
         }
     }

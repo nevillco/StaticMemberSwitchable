@@ -6,6 +6,7 @@ public struct StaticMemberSwitchableError: Error {
     public enum Kind: String {
         case notAStruct
         case noStaticMembersFound
+        case noStaticMembersWithAccessLevelFound
         case missingRequiredConformance
     }
     public let kind: Kind
@@ -55,12 +56,17 @@ extension StaticMemberSwitchableError {
         kind: .notAStruct
     )
 
+    static let noStaticMembersFound = Self(
+        message: "No static members found in declaration. Make sure the static members are not in a separate extension.",
+        kind: .noStaticMembersFound
+    )
+
     static func noStaticMembersFound(
-        accessLevel: String
+        withAccessLevel accessLevel: AccessLevelModifier
     ) -> Self {
         .init(
-            message: "No static members found. Static members must be declared in the same scope where StaticMemberSwitchable is applied, and have the same access level as the enclosing type. Make sure the static members have \(accessLevel) visibility and are not declared in an extension.",
-            kind: .noStaticMembersFound
+            message: "No static members with \(accessLevel.rawValue) access level found. Static members must have at least the same access level as the enclosing type.",
+            kind: .noStaticMembersWithAccessLevelFound
         )
     }
 
