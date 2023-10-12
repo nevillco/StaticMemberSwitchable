@@ -5,6 +5,7 @@ public struct StaticMemberSwitchableError: Error {
 
     public enum Kind: String {
         case notAStruct
+        case noStaticMembersFound
         case missingRequiredConformance
     }
     public let kind: Kind
@@ -53,6 +54,15 @@ extension StaticMemberSwitchableError {
         message: "StaticMemberSwitchable only supports struct values.",
         kind: .notAStruct
     )
+
+    static func noStaticMembersFound(
+        accessLevel: String
+    ) -> Self {
+        .init(
+            message: "No static members found. Static members must be declared in the same scope where StaticMemberSwitchable is applied, and have the same access level as the enclosing type. Make sure the static members have \(accessLevel) visibility and are not declared in an extension.",
+            kind: .noStaticMembersFound
+        )
+    }
 
     static let missingRequiredConformance = Self(
         message: "Types must conform to either Equatable or Identifiable in the same declaraction that they use @StaticMemberSwitchable.", 

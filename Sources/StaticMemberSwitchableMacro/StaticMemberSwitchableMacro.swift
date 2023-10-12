@@ -18,22 +18,30 @@ public struct StaticMemberSwitchableMacro: MemberMacro {
             declaration: structDeclaration
         ).map(\.identifier.text)
 
+        guard staticPropertyIdentifiers.isEmpty == false else {
+            throw StaticMemberSwitchableError
+                .noStaticMembersFound(
+                    accessLevel: structDeclaration.accessLevel.rawValue
+                )
+                .diagnostic(node: node)
+        }
+
         if self.declaration(
             structDeclaration,
             inheritsProtocolNamed: "Identifiable"
         ) {
             return [
                 """
-                enum StaticMemberSwitchable {
+                \(raw: structDeclaration.accessLevel) enum StaticMemberSwitchable {
                     \(raw: staticPropertyIdentifiers
                         .map { "case \($0)" }
                         .joined(separator: "\n")
                     )
                 }
-                var switchable: StaticMemberSwitchable {
+                \(raw: structDeclaration.accessLevel) var switchable: StaticMemberSwitchable {
                     Self.switchable(id: self.id)
                 }
-                static func switchable(id: ID) -> StaticMemberSwitchable {
+                \(raw: structDeclaration.accessLevel) static func switchable(id: ID) -> StaticMemberSwitchable {
                     switch id {
                         \(raw: staticPropertyIdentifiers
                             .map { propertyName in
@@ -53,13 +61,13 @@ public struct StaticMemberSwitchableMacro: MemberMacro {
         ) {
             return [
                 """
-                enum StaticMemberSwitchable {
+                \(raw: structDeclaration.accessLevel) enum StaticMemberSwitchable {
                     \(raw: staticPropertyIdentifiers
                         .map { "case \($0)" }
                         .joined(separator: "\n")
                     )
                 }
-                var switchable: StaticMemberSwitchable {
+                \(raw: structDeclaration.accessLevel) var switchable: StaticMemberSwitchable {
                     switch self {
                         \(raw: staticPropertyIdentifiers
                             .map { propertyName in

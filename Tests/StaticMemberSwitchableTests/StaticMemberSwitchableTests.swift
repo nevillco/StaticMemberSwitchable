@@ -6,6 +6,7 @@ final class StaticMemberSwitchableTests: XCTestCase {
 
     override func invokeTest() {
         withMacroTesting(
+            isRecording: false,
             macros: ["StaticMemberSwitchable": StaticMemberSwitchableMacro.self]
         ) {
             super.invokeTest()
@@ -14,8 +15,8 @@ final class StaticMemberSwitchableTests: XCTestCase {
 
     // MARK: Success cases
 
-    func testSuccess_Identifiable() {
-        assertMacro(record: false) {
+    func testSuccess_Identifiable_Internal() {
+        assertMacro {
             """
             @StaticMemberSwitchable struct Example: Identifiable {
                 static let a: Self = .init(id: "foo")
@@ -46,7 +47,7 @@ final class StaticMemberSwitchableTests: XCTestCase {
 
                 let id: String
 
-                enum StaticMemberSwitchable {
+                internal enum StaticMemberSwitchable {
                     case a
                     case b
                     case c
@@ -54,10 +55,10 @@ final class StaticMemberSwitchableTests: XCTestCase {
                     case e
                     case f
                 }
-                var switchable: StaticMemberSwitchable {
+                internal var switchable: StaticMemberSwitchable {
                     Self.switchable(id: self.id)
                 }
-                static func switchable(id: ID) -> StaticMemberSwitchable {
+                internal static func switchable(id: ID) -> StaticMemberSwitchable {
                     switch id {
                         case Self.a.id: return .a
                         case Self.b.id: return .b
@@ -73,16 +74,16 @@ final class StaticMemberSwitchableTests: XCTestCase {
         }
     }
 
-    func testSuccess_Equatable() {
-        assertMacro(record: false) {
+    func testSuccess_Equatable_Public_PublicCases() {
+        assertMacro {
             """
-            @StaticMemberSwitchable struct Example: Equatable {
-                static let a: Self = .init(id: "foo")
-                static let b = Self.init(id: "bar")
-                static let c = Self(id: "baz")
-                static let d: Example = .init(id: "qux")
-                static let e = Example(id: "qux")
-                static let f = Example.init(id: "thud")
+            @StaticMemberSwitchable public struct Example: Equatable {
+                public static let a: Self = .init(id: "foo")
+                public static let b = Self.init(id: "bar")
+                public static let c = Self(id: "baz")
+                public static let d: Example = .init(id: "qux")
+                public static let e = Example(id: "qux")
+                public static let f = Example.init(id: "thud")
 
                 static let notTheRightType1: Int = 6
                 static let notTheRightType2 = "test"
@@ -92,20 +93,20 @@ final class StaticMemberSwitchableTests: XCTestCase {
             """
         } expansion: {
             """
-            struct Example: Equatable {
-                static let a: Self = .init(id: "foo")
-                static let b = Self.init(id: "bar")
-                static let c = Self(id: "baz")
-                static let d: Example = .init(id: "qux")
-                static let e = Example(id: "qux")
-                static let f = Example.init(id: "thud")
+            public struct Example: Equatable {
+                public static let a: Self = .init(id: "foo")
+                public static let b = Self.init(id: "bar")
+                public static let c = Self(id: "baz")
+                public static let d: Example = .init(id: "qux")
+                public static let e = Example(id: "qux")
+                public static let f = Example.init(id: "thud")
 
                 static let notTheRightType1: Int = 6
                 static let notTheRightType2 = "test"
 
                 let id: String
 
-                enum StaticMemberSwitchable {
+                public enum StaticMemberSwitchable {
                     case a
                     case b
                     case c
@@ -113,7 +114,7 @@ final class StaticMemberSwitchableTests: XCTestCase {
                     case e
                     case f
                 }
-                var switchable: StaticMemberSwitchable {
+                public var switchable: StaticMemberSwitchable {
                     switch self {
                         case .a: return .a
                         case .b: return .b
@@ -176,6 +177,44 @@ final class StaticMemberSwitchableTests: XCTestCase {
                 static let foo: Self = .init(id: "foo")
                 static let bar: Self = .init(id: "bar")
                 static let baz: Self = .init(id: "baz")
+
+                let id: String
+            }
+            """
+        }
+    }
+
+    func testFailure_PublicTypeWithInternalMembers() {
+        assertMacro {
+            """
+            @StaticMemberSwitchable public struct Example: Equatable {
+                static let a: Self = .init(id: "foo")
+                static let b = Self.init(id: "bar")
+                static let c = Self(id: "baz")
+                static let d: Example = .init(id: "qux")
+                static let e = Example(id: "qux")
+                static let f = Example.init(id: "thud")
+
+                static let notTheRightType1: Int = 6
+                static let notTheRightType2 = "test"
+
+                let id: String
+            }
+            """
+        } diagnostics: {
+            """
+            @StaticMemberSwitchable public struct Example: Equatable {
+            ┬──────────────────────
+            ╰─ 🛑 No static members found. Static members must be declared in the same scope where StaticMemberSwitchable is applied, and have the same access level as the enclosing type. Make sure the static members have public visibility and are not declared in an extension.
+                static let a: Self = .init(id: "foo")
+                static let b = Self.init(id: "bar")
+                static let c = Self(id: "baz")
+                static let d: Example = .init(id: "qux")
+                static let e = Example(id: "qux")
+                static let f = Example.init(id: "thud")
+
+                static let notTheRightType1: Int = 6
+                static let notTheRightType2 = "test"
 
                 let id: String
             }
