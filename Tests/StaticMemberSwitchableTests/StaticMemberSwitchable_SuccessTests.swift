@@ -6,7 +6,7 @@ final class StaticMemberSwitchable_SuccessTests: XCTestCase {
 
     override func invokeTest() {
         withMacroTesting(
-            isRecording: false,
+            record: false,
             macros: ["StaticMemberSwitchable": StaticMemberSwitchableMacro.self]
         ) {
             super.invokeTest()
